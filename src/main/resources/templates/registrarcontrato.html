@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+	<meta charset="UTF-8">
+	<title>CAR SAFETY</title>
+	<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
+	<link rel="stylesheet" href="/css/estiloscontrato.css">
+</head>
+<body>
+	<div class="menu_principal">
+		<div class="imagen_header">
+			<img src="/imagenes/logocar.png" class="logo_medium">
+		</div>
+		<div class="titulo">
+			<h1>Generar Contrato Abonado</h1>
+		</div>
+		<div class="subtitulo">
+			Datos Cliente
+		</div>
+		<form th:action="@{/savecontrato}" th:object=${contrato} method="post">
+		<div class="formulario_ingreso_gestion" th:object=${cliente} >
+			<div class="formulario_ingreso_gestion_input" >
+				<label>DNI/RUC</label>
+				<input type="text" id="id" th:field="*{idcliente}" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>  </label>
+				<a class="btn btn-warning" onclick="buscarCliente()" >Buscar Cliente</a>	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Nombre</label>
+				<input type="text" id="nombre" th:field="*{nombre}" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Telefono</label>
+				<input type="text" id="horaingreso" th:field="*{telefono}">		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Email</label>
+				<input type="text" id="horaingreso" th:field="*{email}">		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Dirección</label>
+				<input type="text" id="horaingreso" th:field="*{direccion}" >		
+			</div>
+		</div>
+		<div class="subtitulo">
+			Datos Vehiculo
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				<label>Marca</label>
+				<input type="text" id="marca" th:field="*{marcavehiculo}" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Placa</label>
+				<input type="text" id="placa" th:field="*{placavehiculo}" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Color</label>
+				<input type="text" id="color" th:field="*{colorvehiculo}" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Tipo Vehiculo</label>
+				<input type="text" id="tipo" th:field="*{tipovehiculo}" >		
+			</div>
+		</div>
+		<div class="subtitulo">
+			Datos Contrato
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				<label>Tiempo Contrato</label>
+				<input type="text" id="tipoabono" th:field="*{tiempocontrato}">	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Fecha Inicio</label>
+				<input type="date" id="fechainicio" th:field="*{fechainicio}" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Fecha Venc.</label>
+				<input type="date" id="fechavencimiento" th:field="*{fechavencimiento}" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Monto Pagar S/.</label>
+				<input type="text" id="montopagar" th:field="*{monto}" >		
+			</div>
+		</div>
+		
+		<div class="boton_footer">
+			<button type="submit" class="boton">Generar Contrato</button>
+			<a href="/index" class="boton" >Salir</a>
+		</div>
+		</form>
+		
+	</div>
+		
+<script>
+	
+    // Obtener la hora actual
+    function obtenerHora() {
+	const ahora = new Date();
+	const horas = ahora.getHours().toString().padStart(2, '0'); // Agrega un cero al principio si es necesario
+	const minutos = ahora.getMinutes().toString().padStart(2, '0'); // Agrega un cero al principio si es necesario
+	const segundos = ahora.getSeconds().toString().padStart(2, '0'); // Agrega un cero al principio si es necesario
+	const horaActual = `${horas}:${minutos}:${segundos}`;
+      
+	var fechaActual = new Date();
+
+	var formattedFecha = fechaActual.toISOString().split('T')[0];
+      
+	// Asignar la hora al campo de entrada
+	document.getElementById('horasalida').value = horaActual;
+	document.getElementById('fecha').value = formattedFecha;
+      
+    }
+    function buscarCliente() {
+	// Obtener el valor del input con el id "id"
+	var valorId = document.getElementById("id").value;
+
+	// Redirigir a la URL con el valor del input como parámetro
+	window.location.href = "/buscarcli/" + valorId;
+	
+	
+	}
+	
+	function calcularTiempoMonto(){
+		var horaInicio = document.getElementById("horaingreso").value;
+		var horaFin = document.getElementById("horasalida").value;
+		var precio = document.getElementById("tipovehiculo").value;
+		//var tiempo = document.getElementById("tiempo").value;
+		//var preciototal = document.getElementById("preciotoral").value;
+		
+		// Dividir las horas y minutos
+            var [horaInicioHH, horaInicioMM] = horaInicio.split(":");
+            var [horaFinHH, horaFinMM] = horaFin.split(":");
+
+            // Convertir a minutos
+            var minutosInicio = parseInt(horaInicioHH) * 60 + parseInt(horaInicioMM);
+            var minutosFin = parseInt(horaFinHH) * 60 + parseInt(horaFinMM);
+
+            // Calcular la diferencia en minutos
+            var diferenciaEnMinutos = minutosFin - minutosInicio;
+
+            // Calcular horas y minutos
+            var horas = Math.floor(diferenciaEnMinutos / 60);
+            var minutos = diferenciaEnMinutos % 60;
+            
+            var totalMinutos = horas * 60 + minutos;
+
+			// Calcular el número de horas redondeando hacia arriba
+			var numeroHoras = Math.ceil(totalMinutos / 60);
+			var total = precio*numeroHoras;
+			console.log(precio);
+			
+			if(isNaN(horas)){
+				horas = "0";
+			}
+			if(isNaN(minutos)){
+				minutos = "0";
+			}
+			if(isNaN(total)){
+				total = "0";
+				//document.getElementById("tipovehiculo").value = "Hola";
+			}
+			
+
+            // Formatear la diferencia
+            var diferenciaFormateada = horas + " hrs. " + minutos + " min.";
+
+            // Mostrar la diferencia en el input correspondiente
+            document.getElementById("tiempo").value = diferenciaFormateada;
+            document.getElementById("preciototal").value = total;
+            document.getElementById("estado").value = "Pagado";
+	}
+	
+   
+    // Llamar a la función al cargar la página
+   
+    
+	document.getElementById('placa').addEventListener('input', function () {
+            // Convertir el texto a mayúsculas
+            this.value = this.value.toUpperCase();
+	});
+	
+	
+</script>
+<script th:if="${editar}" th:inline="javascript">
+    /*<![CDATA[*/
+    window.onload = function() {
+        obtenerHora();
+        calcularTiempoMonto();
+    };
+    /*]]>*/
+</script>
+</body>
+</html>
