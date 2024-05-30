@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es"
+>
+<head>
+	<meta charset="UTF-8">
+	<title>CAR SAFETY</title>
+	<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
+	<link rel="stylesheet" href="css/estilos2.css">
+</head>
+<body>
+	<div class="fondo-gradiente"></div>
+	<div class="menu_principal">
+		<div class="imagen_header">
+			<img src="imagenes/logocar.png" class="logo_medium">
+		</div>
+		<div class="titulo">
+			<h1>Registrar Cliente</h1>
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				<label>DNI/RUC</label>
+				<input type="text" id="id">	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Nombre</label>
+				<input type="text" id="nombre" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Telefono</label>
+				<input type="text" id="telefono" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>E-mail</label>
+				<input type="text" id="email" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Dirección</label>
+				<input type="text" id="direccion" >		
+			</div>
+		</div>
+		<div class="boton_footer">
+			<button id="enviarDatos" class="boton" >Registrar Cliente</button>
+			<a href="menuprincipal.html" class="boton" >Cancelar</a>
+		</div>	
+		<div id="modal_procesando" class="modal_procesando">
+			<h1>Procesando...</h1>
+		</div>	
+	</div>
+		
+<script>
+
+    function obtenerToken() {
+      return localStorage.getItem('miToken');
+    }
+
+    document.getElementById("enviarDatos").addEventListener("click", function() {
+
+        var token = obtenerToken();
+
+        var id = document.getElementById("id").value;
+        var nombre = document.getElementById("nombre").value;
+        var telefono = document.getElementById("telefono").value;
+        var email = document.getElementById("email").value;
+        var direccion = document.getElementById("direccion").value;
+
+        var url = "/registrarcliente?id=" + id + "&nombre=" + nombre + "&telefono=" + telefono +
+        "&email=" + email + "&direccion=" + direccion ;
+
+        fetch(url, {
+        method: "POST",
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            "Content-Type": "application/json"
+        }
+        })
+        .then(data => {
+            console.log(data); // Puedes manejar la respuesta de la API aquí
+            alert("Usuario Registrado correctamente");
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Usuario No Registrado");
+        });
+        });
+</script>
+</body>
+</html>

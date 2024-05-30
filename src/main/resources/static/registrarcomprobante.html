@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es"
+>
+<head>
+	<meta charset="UTF-8">
+	<title>CAR SAFETY</title>
+	<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
+	<link rel="stylesheet" href="css/estiloscontrato.css">
+</head>
+<body>
+    <div class="fondo-gradiente"></div>
+	<div class="menu_principal">
+		<div class="imagen_header">
+			<img src="imagenes/logocar.png" class="logo_medium">
+		</div>
+		<div class="titulo">
+			<h1>Generar Comprobante Pago</h1>
+		</div>
+		<div class="subtitulo">
+			Datos del Comprobante de Pago
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input" >
+				<label>Ingresar DNI/RUC</label>
+				<input type="text" id="id" >	
+			</div>
+            <div class="formulario_ingreso_gestion_input" >
+				<label style="font-size: 15px;">Ingresar Orden de Pago</label>
+				<input type="text" id="idord" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>  </label>
+				<a class="btn btn-warning" onclick="obtenerClienteOrden()" style="font-size: 15px;" >Buscar Cliente y Orden Compra</a>	
+			</div>
+		</div>
+		<div class="formulario_ingreso_gestion" >
+            <div class="formulario_ingreso_gestion_input">
+				<label>Nombre</label>
+				<input type="text" id="nombre" readonly tabindex="-1">	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Dirección</label>
+				<input type="text" id="direccion"  readonly tabindex="-1">		
+			</div>
+			<div class="formulario_ingreso_gestion_input" >
+				<label>Detalle</label>
+				<input type="text" id="detalle" readonly tabindex="-1">	
+			</div>
+			<div class="formulario_ingreso_gestion_input" >
+				<label>MONTO</label>
+				<input type="text" id="monto" readonly tabindex="-1">	
+			</div>
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				<label>Serie</label>
+				<select id="serie" name="serie">
+					<option value="" disabled selected>Selecciona</option>
+					<option value="001">001</option>
+					<option value="002">002</option>
+					<option value="003">003</option>
+				</select>	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Tipo Comprobante</label>
+				<select id="tipocomprobante" name="tipocomprobante">
+					<option value="" disabled selected>Selecciona</option>
+					<option value="Boleta Venta">Boleta Venta</option>
+					<option value="Factura">Factura</option>
+				</select>	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Fecha Emisión</label>
+				<input type="date" id="fecha">		
+			</div>
+			
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Sub-Total</label>
+				<input type="text" id="subtotal" readonly>	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>IGV</label>
+				<input type="text" id="igv" readonly>		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Total</label>
+				<input type="text" id="montototal" readonly>
+			</div>
+			
+		</div>
+		
+		<div class="boton_footer">
+			<button id="generarComprobante" class="boton">Generar Comprobante</button>
+			<a href="menuprincipal.html" class="boton" >Cancelar</a>
+		</div>
+		<div id="modal_procesando" class="modal_procesando">
+			<h1>Procesando...</h1>
+		</div>
+	</div>
+		
+<script>
+
+    document.getElementById("generarComprobante").addEventListener("click", function() {
+
+        var token = obtenerToken();
+
+        var clienteObj = {
+            idcliente: document.getElementById("id").value,
+            
+        };
+
+        var ordenPagoObj = {
+            idordenpago: document.getElementById("idord").value,
+    
+        };
+
+        var ComprobantePago = {
+            cliente: clienteObj,
+            ordenPago: ordenPagoObj,
+            serie: document.getElementById("serie").value,
+            tipocomprobante: document.getElementById("tipocomprobante").value,
+            detalle: document.getElementById("detalle").value,
+            fechaemision: document.getElementById("fecha").value,
+            total: document.getElementById("montototal").value,
+            subtotal: document.getElementById("subtotal").value,
+            igv: document.getElementById("igv").value,
+        };
+
+
+        var url = "/registrarcomprobante";
+        var modalprocesando = document.getElementById('modal_procesando');
+      	modalprocesando.style.display = 'flex';
+
+        fetch(url, {
+        method: "POST",
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            "Content-Type": "application/json"
+            },
+        body: JSON.stringify(ComprobantePago)
+        })
+        .then(data => {
+            console.log(data);
+            modalprocesando.style.display = 'none';
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Error al Generar Contrato");
+            modalprocesando.style.display = 'none';
+        });
+    });
+
+    function obtenerClienteOrden(){
+        if (validarCampos()) {
+        obtenerCliente();
+        obtenerOrdenPago();
+        }
+    }
+
+    function obtenerToken() {
+      return localStorage.getItem('miToken');
+    }
+
+    function validarCampos(){
+        var input1Value = document.getElementById('id').value;
+        var input2Value = document.getElementById('idord').value;
+
+        // Realizar la validación (puedes personalizar esto según tus necesidades)
+        if (input1Value === "" && input2Value != "" ) {
+            alert("Ingresar DNI/RUC");
+            return false;
+        }else if( input2Value === "" && input1Value != "" ){
+            alert("Ingresar Orden de Compra");
+            return false;
+        }else if( input2Value === "" && input1Value === "" ){
+            alert("Ingresar DNI y Orden de Compra");
+            return false;
+        }
+        return true;
+    }
+    var modalprocesando = document.getElementById('modal_procesando');
+
+    function obtenerCliente(){    
+        var token = obtenerToken();
+        console.log(token);
+        var id = document.getElementById("id").value;
+        var idset = document.getElementById("id");
+        var nombre = document.getElementById("nombre");
+        var direccion = document.getElementById("direccion");
+
+        var url = "/buscarcliente/" + id ;
+      	modalprocesando.style.display = 'flex';
+
+        fetch(url, {
+        method: "GET",
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            "Content-Type": "application/json"
+        }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parsea la respuesta como JSON
+        })
+        .then(data => {
+            console.log(data);
+            idset.value = data.idcliente;
+            nombre.value = data.nombre;
+            direccion.value = data.direccion;
+            //obtenerHora();
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Cliente no obtenido");
+        });
+    }
+
+    function obtenerOrdenPago(){    
+        var token = obtenerToken();
+        console.log(token);
+        var id = document.getElementById("idord").value;
+        var idord = document.getElementById("idord");
+        var detalle = document.getElementById("detalle");
+        var monto = document.getElementById("monto");
+        var montototal = document.getElementById("montototal");
+
+        var url = "/buscarorden/" + id ;
+
+        fetch(url, {
+        method: "GET",
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            "Content-Type": "application/json"
+        }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parsea la respuesta como JSON
+        })
+        .then(data => {
+            console.log(data);
+            idord.value = data.idordenpago;
+            detalle.value = data.detalle;
+            monto.value = data.monto;
+            montototal.value = data.monto;
+            modalprocesando.style.display = 'none';
+            calcularSubTotalIgv();
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Orden de Compra no obtenido");
+        });
+    }
+	
+    // Obtener la hora actual
+    function obtenerHora() {
+	
+	var fechaActual = new Date();
+
+	var formattedFecha = fechaActual.toISOString().split('T')[0];
+      
+	// Asignar la hora al campo de entrada
+	document.getElementById('fecha').value = formattedFecha;
+    }
+
+	function calcularSubTotalIgv(){
+		var monto = document.getElementById("monto").value;
+		console.log(monto);
+		var subtotal = monto / (1 + (18 / 100));
+		var igv = monto - subtotal;
+		
+		document.getElementById('montototal').value = monto;
+		document.getElementById('subtotal').value = subtotal.toFixed(2);
+		document.getElementById('igv').value = igv.toFixed(2);
+	}
+	
+	function calcularTiempoMonto(){
+		var horaInicio = document.getElementById("horaingreso").value;
+		var horaFin = document.getElementById("horasalida").value;
+		var precio = document.getElementById("tipovehiculo").value;
+		//var tiempo = document.getElementById("tiempo").value;
+		//var preciototal = document.getElementById("preciotoral").value;
+		
+		// Dividir las horas y minutos
+            var [horaInicioHH, horaInicioMM] = horaInicio.split(":");
+            var [horaFinHH, horaFinMM] = horaFin.split(":");
+
+            // Convertir a minutos
+            var minutosInicio = parseInt(horaInicioHH) * 60 + parseInt(horaInicioMM);
+            var minutosFin = parseInt(horaFinHH) * 60 + parseInt(horaFinMM);
+
+            // Calcular la diferencia en minutos
+            var diferenciaEnMinutos = minutosFin - minutosInicio;
+
+            // Calcular horas y minutos
+            var horas = Math.floor(diferenciaEnMinutos / 60);
+            var minutos = diferenciaEnMinutos % 60;
+            
+            var totalMinutos = horas * 60 + minutos;
+
+			// Calcular el número de horas redondeando hacia arriba
+			var numeroHoras = Math.ceil(totalMinutos / 60);
+			var total = precio*numeroHoras;
+			console.log(precio);
+			
+			if(isNaN(horas)){
+				horas = "0";
+			}
+			if(isNaN(minutos)){
+				minutos = "0";
+			}
+			if(isNaN(total)){
+				total = "0";
+				//document.getElementById("tipovehiculo").value = "Hola";
+			}
+			
+
+            // Formatear la diferencia
+            var diferenciaFormateada = horas + " hrs. " + minutos + " min.";
+
+            // Mostrar la diferencia en el input correspondiente
+            document.getElementById("tiempo").value = diferenciaFormateada;
+            document.getElementById("preciototal").value = total;
+            document.getElementById("estado").value = "Pagado";
+	}
+	
+</script>
+<script>
+    /*<![CDATA[*/
+    window.onload = function() {
+        obtenerHora();
+    };
+    /*]]>*/
+</script>
+</body>
+</html>

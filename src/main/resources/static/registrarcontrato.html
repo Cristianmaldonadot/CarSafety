@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es"
+>
+<head>
+	<meta charset="UTF-8">
+	<title>CAR SAFETY</title>
+	<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
+	<link rel="stylesheet" href="css/estiloscontrato.css">
+</head>
+<body>
+	<div class="fondo-gradiente"></div>
+	<div class="menu_principal">
+		<div class="imagen_header">
+			<img src="imagenes/logocar.png" class="logo_medium">
+		</div>
+		<div class="titulo">
+			<h1>Generar Contrato Abonado</h1>
+		</div>
+		<div class="subtitulo">
+			Datos Cliente
+		</div>
+		<div class="formulario_ingreso_gestion" th:object=${cliente} >
+			<div class="formulario_ingreso_gestion_input" >
+				<label>DNI/RUC</label>
+				<input type="text" id="id" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>  </label>
+				<a class="btn btn-warning" id="obtenerCliente" >Buscar Cliente</a>	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Nombre</label>
+				<input type="text" id="nombre" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Telefono</label>
+				<input type="text" id="telefono" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Email</label>
+				<input type="text" id="email" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Dirección</label>
+				<input type="text" id="direccion">		
+			</div>
+		</div>
+		<div class="subtitulo">
+			Datos Vehiculo
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				<label>Marca</label>
+				<input type="text" id="marca" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Placa</label>
+				<input type="text" id="placa" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Color</label>
+				<input type="text" id="color" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Tipo Vehiculo</label>
+				<input type="text" id="tipo" >		
+			</div>
+		</div>
+		<div class="subtitulo">
+			Datos Contrato
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				<label>Tiempo Contrato</label>
+				<input type="text" id="tipoabono" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Fecha Inicio</label>
+				<input type="date" id="fechainicio" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Fecha Venc.</label>
+				<input type="date" id="fechavencimiento" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Monto Pagar S/.</label>
+				<input type="text" id="montopagar" >		
+			</div>
+		</div>
+		
+		<div class="boton_footer">
+			<button id="generarContrato" class="boton">Generar Contrato</button>
+			<a href="menuprincipal.html" class="boton" >Cancelar</a>
+		</div>
+		<div id="modal_procesando" class="modal_procesando">
+			<h1>Procesando...</h1>
+		</div>
+	</div>
+		
+<script>
+
+    function obtenerToken() {
+      return localStorage.getItem('miToken');
+    }
+
+    document.getElementById("obtenerCliente").addEventListener("click", function() {
+
+        var token = obtenerToken();
+        console.log(token);
+        var id = document.getElementById("id").value;
+        var idset = document.getElementById("id");
+        var nombre = document.getElementById("nombre");
+        var telefono = document.getElementById("telefono");
+        var email = document.getElementById("email");
+        var direccion = document.getElementById("direccion");
+
+        var url = "/buscarcliente/" + id ;
+        var modalprocesando = document.getElementById('modal_procesando');
+      	modalprocesando.style.display = 'flex';
+
+        fetch(url, {
+        method: "GET",
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            "Content-Type": "application/json"
+        }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parsea la respuesta como JSON
+        })
+        .then(data => {
+            console.log(data);
+            idset.value = data.idcliente;
+            nombre.value = data.nombre;
+            telefono.value = data.telefono;
+            email.value = data.email;
+            direccion.value = data.direccion;
+            modalprocesando.style.display = 'none';
+            //obtenerHora();
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Cliente no obtenido");
+        });
+    });
+
+     document.getElementById("generarContrato").addEventListener("click", function() {
+
+        var token = obtenerToken();
+
+        var clienteObj = {
+            idcliente: document.getElementById("id").value,
+            // ... otras propiedades del cliente
+        };
+
+        var Contrato = {
+            cliente: clienteObj,
+            marcavehiculo: document.getElementById("marca").value,
+            placavehiculo: document.getElementById("placa").value,
+            colorvehiculo: document.getElementById("color").value,
+            tipovehiculo: document.getElementById("tipo").value,
+            tiempocontrato: document.getElementById("tipoabono").value,
+            fechainicio: document.getElementById("fechainicio").value,
+            fechavencimiento: document.getElementById("fechavencimiento").value,
+            monto: document.getElementById("montopagar").value
+        };
+
+
+        var url = "/guardarcontrato";
+        var modalprocesando = document.getElementById('modal_procesando');
+      	modalprocesando.style.display = 'flex';
+
+        fetch(url, {
+        method: "POST",
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            "Content-Type": "application/json"
+            },
+        body: JSON.stringify(Contrato)
+        })
+        .then(data => {
+            console.log(data);
+            modalprocesando.style.display = 'none';
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Error al Generar Contrato");
+        });
+    });
+	
+    // Obtener la hora actual
+    function obtenerHora() {
+	const ahora = new Date();
+	const horas = ahora.getHours().toString().padStart(2, '0'); // Agrega un cero al principio si es necesario
+	const minutos = ahora.getMinutes().toString().padStart(2, '0'); // Agrega un cero al principio si es necesario
+	const segundos = ahora.getSeconds().toString().padStart(2, '0'); // Agrega un cero al principio si es necesario
+	const horaActual = `${horas}:${minutos}:${segundos}`;
+      
+	var fechaActual = new Date();
+
+	var formattedFecha = fechaActual.toISOString().split('T')[0];
+      
+	// Asignar la hora al campo de entrada
+	document.getElementById('horasalida').value = horaActual;
+	document.getElementById('fecha').value = formattedFecha;
+      
+    }
+    function buscarCliente() {
+	// Obtener el valor del input con el id "id"
+	var valorId = document.getElementById("id").value;
+
+	// Redirigir a la URL con el valor del input como parámetro
+	window.location.href = "/buscarcli/" + valorId;
+	
+	
+	}
+	
+	function calcularTiempoMonto(){
+		var horaInicio = document.getElementById("horaingreso").value;
+		var horaFin = document.getElementById("horasalida").value;
+		var precio = document.getElementById("tipovehiculo").value;
+		//var tiempo = document.getElementById("tiempo").value;
+		//var preciototal = document.getElementById("preciotoral").value;
+		
+		// Dividir las horas y minutos
+            var [horaInicioHH, horaInicioMM] = horaInicio.split(":");
+            var [horaFinHH, horaFinMM] = horaFin.split(":");
+
+            // Convertir a minutos
+            var minutosInicio = parseInt(horaInicioHH) * 60 + parseInt(horaInicioMM);
+            var minutosFin = parseInt(horaFinHH) * 60 + parseInt(horaFinMM);
+
+            // Calcular la diferencia en minutos
+            var diferenciaEnMinutos = minutosFin - minutosInicio;
+
+            // Calcular horas y minutos
+            var horas = Math.floor(diferenciaEnMinutos / 60);
+            var minutos = diferenciaEnMinutos % 60;
+            
+            var totalMinutos = horas * 60 + minutos;
+
+			// Calcular el número de horas redondeando hacia arriba
+			var numeroHoras = Math.ceil(totalMinutos / 60);
+			var total = precio*numeroHoras;
+			console.log(precio);
+			
+			if(isNaN(horas)){
+				horas = "0";
+			}
+			if(isNaN(minutos)){
+				minutos = "0";
+			}
+			if(isNaN(total)){
+				total = "0";
+				//document.getElementById("tipovehiculo").value = "Hola";
+			}
+			
+
+            // Formatear la diferencia
+            var diferenciaFormateada = horas + " hrs. " + minutos + " min.";
+
+            // Mostrar la diferencia en el input correspondiente
+            document.getElementById("tiempo").value = diferenciaFormateada;
+            document.getElementById("preciototal").value = total;
+            document.getElementById("estado").value = "Pagado";
+	}
+	
+   
+    // Llamar a la función al cargar la página
+   
+    
+	document.getElementById('placa').addEventListener('input', function () {
+            // Convertir el texto a mayúsculas
+            this.value = this.value.toUpperCase();
+	});
+	
+	
+</script>
+<script>
+    /*<![CDATA[*/
+    window.onload = function() {
+        //obtenerHora();
+        //calcularTiempoMonto();
+    };
+    /*]]>*/
+</script>
+</body>
+</html>

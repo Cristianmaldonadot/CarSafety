@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es"
+>
+<head>
+	<meta charset="UTF-8">
+	<title>CAR SAFETY</title>
+	<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
+	<link rel="stylesheet" href="css/estilos2.css">
+</head>
+<body>
+  <div class="fondo-gradiente"></div>
+	<div class="menu_principal">
+		<div class="imagen_header">
+			<img src="imagenes/logocar.png" class="logo_medium">
+		</div>
+		<div class="titulo">
+			<h1>Registrar Ticket</h1>
+		</div>
+		<div class="formulario_ingreso">
+			<div class="formulario_ingreso_input">
+				<label>Tipo Vehiculo</label>
+				<select id="tipovehiculo" name="tipovehiculo">
+					<option value="" disabled selected>Selecciona</option>
+					<option value="5.5">Camioneta</option>
+					<option value="4.0">Auto</option>
+					<option value="2.5">Moto</option>
+				</select>	
+			</div>
+			<div class="formulario_ingreso_input">
+				<label>Placa:</label>
+				<input type="text" id="placa" >		
+			</div>
+			<div class="formulario_ingreso_input">
+				<label>Hora Ingreso</label>
+				<input type="text" id="hora" readonly >		
+			</div>
+			<div class="formulario_ingreso_input">
+				<label>Fecha</label>
+				<input type="date" id="fecha" readonly >		
+			</div>
+		</div>
+		<div class="boton_footer">
+			<button id="enviarDatos" class="boton">Registrar Ticket</button>
+			<a href="menuprincipal.html" class="boton" >Cancelar</a>
+		</div>
+		<div id="modal_procesando" class="modal_procesando">
+			<h1>Procesando...</h1>
+		</div>
+	</div>	
+<script>
+    function obtenerToken() {
+      return localStorage.getItem('miToken');
+    }
+
+    document.getElementById("enviarDatos").addEventListener("click", function() {
+
+        var token = obtenerToken();
+
+        var tipovehiculo = document.getElementById("tipovehiculo").value;
+        var placa = document.getElementById("placa").value;
+        var horaingreso = document.getElementById("hora").value;
+        var fechaentrada = document.getElementById("fecha").value;
+        var modalprocesando = document.getElementById('modal_procesando');
+      	modalprocesando.style.display = 'flex';
+
+        var url = "/registrarticket?tipovehiculo=" + tipovehiculo + "&placa=" + placa + "&horaingreso=" + horaingreso +
+        "&fechaentrada=" + fechaentrada ;
+
+        fetch(url, {
+        method: "POST",
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            "Content-Type": "application/json"
+        }
+        })
+        .then(data => {
+            console.log(data); // Puedes manejar la respuesta de la API aquí
+            modalprocesando.style.display = 'none';
+            window.location.href = "menuprincipal.html";
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Ticket No Registrado");
+        });
+    });
+
+
+
+    // Obtener la hora actual
+    function obtenerHora() {
+      const ahora = new Date();
+      const horas = ahora.getHours().toString().padStart(2, '0'); // Agrega un cero al principio si es necesario
+      const minutos = ahora.getMinutes().toString().padStart(2, '0'); // Agrega un cero al principio si es necesario
+      const segundos = ahora.getSeconds().toString().padStart(2, '0'); // Agrega un cero al principio si es necesario
+      const horaActual = `${horas}:${minutos}:${segundos}`;
+      
+      var fechaActual = new Date();
+
+      var formattedFecha = fechaActual.toISOString().split('T')[0];
+      
+      // Asignar la hora al campo de entrada
+      document.getElementById('hora').value = horaActual;
+      document.getElementById('fecha').value = formattedFecha;
+    }
+    
+    
+
+    // Llamar a la función al cargar la página
+    window.onload = function() {
+      obtenerHora();
+    };
+    
+    document.getElementById('placa').addEventListener('input', function () {
+            // Convertir el texto a mayúsculas
+            this.value = this.value.toUpperCase();
+        });
+</script>
+</body>
+</html>

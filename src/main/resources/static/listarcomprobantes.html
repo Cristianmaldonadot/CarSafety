@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+	<title>CAR SAFETY</title>
+	<link rel="stylesheet" href="css/estilos2.css">
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="fondo-gradiente"></div>
+  <div id="maintabla" class="menu_principal">
+		<div class="imagen_header">
+			<img src="imagenes/logocar.png" class="logo_medium">
+		</div>
+		<div class="titulo">
+			<h1>Listar Comprobante</h1>
+		</div>
+		<div class="div_table">
+		<table id="tablaDatos" >
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Cliente</th>
+                    <th>Detalle</th>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+        </table>
+		</div>
+        <div class="boton_footer">
+			<button onclick="mostrarPDF()" class="boton" >Imprimir</button>
+            <a href="menuprincipal.html" class="boton" >Cancelar</a>
+		</div>
+		<div id="modal_procesando" class="modal_procesando">
+			<h1>Procesando...</h1>
+		</div>
+	</div>
+  <script src='js/jspdf.min.js'></script>
+  <script type="text/javascript">
+    
+    function obtenerToken() {
+      return localStorage.getItem('miToken');
+    }
+    function obtenerJson() {
+      return localStorage.getItem('miJson');
+    }
+
+    function mostrarInformacion(data) {
+      var infoContainer = document.getElementById('info-container');
+      infoContainer.innerHTML = '<p>Información del servidor:</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+    }
+
+    function mostrarPDF(){
+    var tabla = document.getElementById("tablaDatos");
+
+    // Usa html2canvas para capturar la tabla como una imagen
+    html2canvas(tabla).then(function(canvas) {
+    // Obtiene la URL de la imagen base64
+    var imagenBase64 = canvas.toDataURL('image/png');
+
+    // Crea una instancia de jsPDF
+    var pdf = new jsPDF('p', 'pt', 'letter');
+
+    // Agrega la imagen como tabla al PDF
+    pdf.addImage(imagenBase64, 'PNG', 10, 10, 500, 0, 'FAST');
+
+    // Guarda el PDF con un nombre específico (opcional)
+    pdf.save('mi_pdf_con_tabla.pdf');
+  });
+  }
+    
+
+    function mostrarDatosComprobante(datosDesdeAPI){
+
+      var tabla = document.getElementById("tablaDatos");
+
+      datosDesdeAPI.forEach(function (dato) {
+      var fila = tabla.insertRow();
+      var celdaId = fila.insertCell(0);
+      var celdaCliente = fila.insertCell(1);
+      var celdaDetalle = fila.insertCell(2);
+      var celdaTipo = fila.insertCell(3);
+      var celdaFecha = fila.insertCell(4);
+      var celdaTotal = fila.insertCell(5);
+      var celdaAccion = fila.insertCell(6);
+
+      var idCliente = dato.cliente.nombre;
+      
+      celdaId.innerHTML = dato.idcomprobante;
+      celdaCliente.innerHTML = idCliente;
+      celdaDetalle.innerHTML = dato.detalle;
+      celdaTipo.innerHTML = dato.tipocomprobante;
+      celdaFecha.innerHTML = dato.fechaemision;
+      celdaTotal.innerHTML = dato.total;
+      celdaAccion.innerHTML = '<button class="boton_table" onclick="Eliminar(\'' + dato.idcomprobante + '\')">Eliminar</button>';
+      });
+    }
+
+    function Eliminar(idcliente) {
+      var token = obtenerToken();
+
+      if (token) {
+        fetch('/eliminarcliente/'+idcliente, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error al eliminar Cliente');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Respuesta del servidor:', data);
+        })
+        .catch(error => {
+          console.error('Error:', error.message);
+        });
+      } else {
+        console.log('Token no encontrado. El usuario no ha iniciado sesión.');
+        // Puedes redirigir al usuario a la página de inicio de sesión si el token no está presente
+      }
+    }
+
+    function realizarSolicitudProtegida() {
+      var token = obtenerToken();
+      var modalprocesando = document.getElementById('modal_procesando');
+      modalprocesando.style.display = 'flex';
+
+      if (token) {
+        fetch('/listarcomprobantes', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error en la solicitud al recurso protegido');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Respuesta del servidor:', data);
+          modalprocesando.style.display = 'none';
+          mostrarDatosComprobante(data);
+        })
+        .catch(error => {
+          console.error('Error:', error.message);
+        });
+      } else {
+        console.log('Token no encontrado. El usuario no ha iniciado sesión.');
+        // Puedes redirigir al usuario a la página de inicio de sesión si el token no está presente
+      }
+    }
+
+    // Llamar a la función para realizar la solicitud protegida cuando la página se carga
+    window.onload = function () {
+      realizarSolicitudProtegida();
+    };
+
+    function guardarJsonEnLocalStorage(clave, datos) {
+    // Convierte el JSON a cadena antes de almacenarlo en localStorage
+    var jsonString = JSON.stringify(datos);
+
+    // Guarda la cadena en localStorage con la clave específica
+    localStorage.setItem(clave, jsonString);
+
+    console.log('JSON guardado en localStorage con la clave:', clave);
+    }
+  </script>
+</body>
+</html>

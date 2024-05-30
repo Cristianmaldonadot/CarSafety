@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es"
+>
+<head>
+	<meta charset="UTF-8">
+	<title>CAR SAFETY</title>
+	<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+	crossorigin="anonymous">
+	<link rel="stylesheet" href="css/estiloscontrato.css">
+</head>
+<body>
+	<div class="fondo-gradiente"></div>
+	<div class="menu_principal">
+		<div class="imagen_header">
+			<img src="imagenes/logocar.png" class="logo_medium">
+		</div>
+		<div class="titulo">
+			<h1>Renovar Contrato</h1>
+		</div>
+		<div class="subtitulo">
+			Datos Cliente 
+			<div>&nbsp;&nbsp;&nbsp;&nbsp;Contrato Nro: <span id="copiacontrato"></span></div>
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input" >
+				<label>CONTRATO</label>
+				<input type="text" id="id">	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>  </label>
+				<a class="btn btn-warning" id="obtenerContrato" >Buscar</a>	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Id Cliente</label>
+				<input type="text" id="cliente" >	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>RefContrato</label>
+				<input type="text" id="idreferencia">	
+			</div>
+			
+		</div>
+		<div class="subtitulo">
+			Datos Vehiculo
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				<label>Marca</label>
+				<input type="text" id="marca">	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Placa</label>
+				<input type="text" id="placa">		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Color</label>
+				<input type="text" id="color" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Tipo Vehiculo</label>
+				<input type="text" id="tipo" >		
+			</div>
+		</div>
+		<div class="subtitulo">
+			Datos Contrato
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				<label>Tiempo Contrato</label>
+				<input type="text" id="tipoabono" readonly>	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Fecha Inicio</label>
+				<input type="date" id="fechainicio" readonly>		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Fecha Venc.</label>
+				<input type="date" id="fechavencimiento" readonly>		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Monto Pagar S/.</label>
+				<input type="text" id="montopagar" readonly>		
+			</div>
+		</div>
+		<div class="subtitulo">
+			Nuevos Datos Contrato
+		</div>
+		<div class="formulario_ingreso_gestion">
+			<div class="formulario_ingreso_gestion_input">
+				<label>Tiempo Contrato</label>
+				<input type="text" id="newtipoabono">	
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Fecha Inicio</label>
+				<input type="date" id="newfechainicio" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Fecha Venc.</label>
+				<input type="date" id="newfechavencimiento" >		
+			</div>
+			<div class="formulario_ingreso_gestion_input">
+				<label>Monto Pagar S/.</label>
+				<input type="text" id="newmontopagar">		
+			</div>
+		</div>
+		
+		<div class="boton_footer">
+			<button class="boton" id="renovarContrato" >Renovar Contrato</button>
+			<a href="menuprincipal.html" class="boton" >Cancelar</a>
+		</div>
+		<div id="modal_procesando" class="modal_procesando">
+			<h1>Procesando...</h1>
+		</div>
+	</div>
+		
+<script>
+    function obtenerToken() {
+      return localStorage.getItem('miToken');
+    }
+
+    document.getElementById("obtenerContrato").addEventListener("click", function() {
+
+        var token = obtenerToken();
+        console.log(token);
+        var id = document.getElementById("id").value;
+        var idset = document.getElementById("id");
+        var cliente = document.getElementById("cliente");
+        var idreferencia = document.getElementById("idreferencia");
+        var marca = document.getElementById("marca");
+        var placa = document.getElementById("placa");
+        var color = document.getElementById("color");
+        var tipo = document.getElementById("tipo");
+        var tipoabono = document.getElementById("tipoabono");
+        var fechainicio = document.getElementById("fechainicio");
+        var fechavencimiento = document.getElementById("fechavencimiento");
+        var montopagar = document.getElementById("montopagar");
+
+        var url = "/buscarcontrato/" + id ;
+        var modalprocesando = document.getElementById('modal_procesando');
+      	modalprocesando.style.display = 'flex';
+
+        fetch(url, {
+        method: "GET",
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            "Content-Type": "application/json"
+        }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // Parsea la respuesta como JSON
+        })
+        .then(data => {
+            console.log(data);
+            idset.value = data.idcontrato;
+            cliente.value = data.cliente.idcliente;
+            idreferencia.value = data.idcontrato;
+            marca.value = data.marcavehiculo;
+            placa.value = data.placavehiculo;
+            color.value = data.colorvehiculo;
+            tipo.value = data.tipovehiculo;
+            tipoabono.value = data.tiempocontrato;
+            fechainicio.value = data.fechainicio;
+            fechavencimiento.value = data.fechavencimiento;
+            montopagar.value = data.monto;
+            modalprocesando.style.display = 'none';
+            //obtenerHora();
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Contrato no obtenido");
+        });
+    });
+
+     document.getElementById("renovarContrato").addEventListener("click", function() {
+
+        var token = obtenerToken();
+
+        var clienteObj = {
+            idcliente: document.getElementById("cliente").value,
+            // ... otras propiedades del cliente
+        };
+
+        var Contrato = {
+            cliente: clienteObj,
+            marcavehiculo: document.getElementById("marca").value,
+            placavehiculo: document.getElementById("placa").value,
+            colorvehiculo: document.getElementById("color").value,
+            tipovehiculo: document.getElementById("tipo").value,
+            tiempocontrato: document.getElementById("newtipoabono").value,
+            fechainicio: document.getElementById("newfechainicio").value,
+            fechavencimiento: document.getElementById("newfechavencimiento").value,
+            monto: document.getElementById("newmontopagar").value,
+            refidcontrato: document.getElementById("idreferencia").value
+        };
+
+
+        var url = "/guardarcontrato";
+        var modalprocesando = document.getElementById('modal_procesando');
+      	modalprocesando.style.display = 'flex';
+
+        fetch(url, {
+        method: "POST",
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            "Content-Type": "application/json"
+            },
+        body: JSON.stringify(Contrato)
+        })
+        .then(data => {
+            console.log(data);
+            modalprocesando.style.display = 'none';
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Error al Renovar Contrato");
+        });
+    });
+	
+    
+	document.getElementById('placa').addEventListener('input', function () {
+            // Convertir el texto a mayúsculas
+            this.value = this.value.toUpperCase();
+	});
+	
+	
+</script>
+<script>
+    /*<![CDATA[*/
+    window.onload = function() {
+        //obtenerHora();
+        //calcularTiempoMonto();
+    };
+    /*]]>*/
+</script>
+</body>
+</html>
